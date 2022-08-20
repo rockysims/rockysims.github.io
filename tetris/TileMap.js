@@ -198,12 +198,12 @@ TileMap.prototype.render = function(fallingBlock, container, onClass, offClass)
 			{
 				if (tiles.getTile(r, c))
 				{
-					this.tileElem[r][c].src = "tetris/onTile.JPG";
+					this.tileElem[r][c].src = "onTile.JPG";
 					this.tileElem[r][c].className = onClass;
 				}
 				else
 				{
-					this.tileElem[r][c].src = "tetris/offTile.JPG";
+					this.tileElem[r][c].src = "offTile.JPG";
 					this.tileElem[r][c].className = offClass;
 				}
 			}
