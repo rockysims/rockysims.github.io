@@ -1,12 +1,12 @@
 function include(src) { document.write("<script src=\"" + src + "\"> </script>"); }
 
-include("tetris/Board.js");
-include("tetris/TileMap.js");
-include("tetris/TileMapRaw.js");
-include("tetris/RowBuffer.js");
-include("tetris/BlockGenerator.js");
-include("tetris/Block.js");
-include("tetris/DebugUtils.js");
+include("Board.js");
+include("TileMap.js");
+include("TileMapRaw.js");
+include("RowBuffer.js");
+include("BlockGenerator.js");
+include("Block.js");
+include("DebugUtils.js");
 
 function TetrisUnlimitedGame(container, width, height, clearence, rate, fastRate, keyRepeatSpeed, rotateSpeed, onClass, offClass)
 {
