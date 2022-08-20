@@ -11,12 +11,7 @@
 
 .featurette .tech {
 	padding-left: 15px;
-}
-
-.featurette .tech::before {
-	content: 'Tech';
-	display: block;
-	text-decoration: underline;
+	padding-top: 10px;
 }
 
 
