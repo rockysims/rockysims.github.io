@@ -1,2 +1,5 @@
+exclude:
+  - vendor/
+
 include:
   - node_modules
