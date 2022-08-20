@@ -1,0 +1,215 @@
+ <html>
+    <head>
+        <title>Tetris Unlimited</title>
+        <script type="text/javascript" src="tetris/TetrisUnlimitedGame.js"></script>
+ 		<style type="text/css">
+			.tileOn
+			{
+			}
+			
+			.tileOff
+			{
+			}
+		</style>
+    </head>
+    <body>
+		<script type="text/javascript">
+			//TODO: Add GAME OPTION: raindrop tiles fall (uncontrolled) from top and attach themselves to falling tiles or the main tile map
+			var LEFT_ARROW = 65;
+			var RIGHT_ARROW = 68;
+			var DOWN_ARROW = 83;
+			var UP_ARROW = 87;
+			var LETTER_P = 80;
+			
+			
+			//BUGS/TODO:
+			//needs next block peeker
+			//needs colored blocks
+			//needs score indicator
+			//needs validity checking on settings
+			var tetrisManager = new TetrisManager();
+            
+            function TetrisManager()
+            {
+				window.onkeydown = function(e)
+				{
+					var code = e.keyCode;
+					switch(code)
+					{
+						case LEFT_ARROW:
+							tetrisManager.uiLeftStart();
+							break;
+						case RIGHT_ARROW:
+							tetrisManager.uiRightStart();
+							break;
+						case DOWN_ARROW:
+							tetrisManager.uiDownStart();
+							break;
+						case UP_ARROW:
+							tetrisManager.uiUpStart();
+							break;
+					}
+				}
+				
+				window.onkeyup = function(e)
+				{
+					var code = e.keyCode;
+					
+					switch(code)
+					{
+						case LEFT_ARROW:
+							tetrisManager.uiLeftEnd();
+							break;
+						case RIGHT_ARROW:
+							tetrisManager.uiRightEnd();
+							break;
+						case DOWN_ARROW:
+							tetrisManager.uiDownEnd();
+							break;
+						case UP_ARROW:
+							tetrisManager.uiUpEnd();
+							break;
+						case LETTER_P:
+							tetrisManager.togglePause();
+							break;
+					}
+				}
+			
+                this.tetris = null;
+            }
+            
+            TetrisManager.prototype.restart = function()
+            {
+				var container = document.getElementById("tetrisContainer");
+                var width = document.getElementById("width").value;
+                var height = document.getElementById("height").value;
+                var clearence = document.getElementById("clearence").value;
+                var rate = document.getElementById("rate").value;
+                var fastRate = document.getElementById("fastRate").value;
+                var rotateSpeed = document.getElementById("rotateSpeed").value;
+                var keyRepeatRate = document.getElementById("keyRepeatRate").value;
+				if (width == "")
+					width = 8;
+				if (height == "")
+					height = 25;
+				if (clearence == "")
+					clearence = 8;
+				if (rate == "")
+					rate = 1000;
+				if (fastRate == "")
+					fastRate = 30;
+				if (rotateSpeed == "")
+					keyRepeatRate = 300;
+				if (keyRepeatRate == "")
+					keyRepeatRate = 80;
+				
+                
+				if (this.tetris)
+					this.tetris.stop();
+				this.tetris = new TetrisUnlimitedGame(container, width, height, clearence, rate, fastRate, keyRepeatRate, rotateSpeed, "tileOn", "tileOff");
+            }
+            
+            TetrisManager.prototype.togglePause = function()
+            {
+				if (this.tetris)
+					this.tetris.uiTogglePause();
+            }
+            
+            TetrisManager.prototype.uiLeftStart = function()
+            {
+				if (this.tetris)
+					 this.tetris.uiLeftStart();
+            }
+            
+            TetrisManager.prototype.uiRightStart = function()
+            {
+				if (this.tetris)
+					this.tetris.uiRightStart();
+            }
+            
+            TetrisManager.prototype.uiDownStart = function()
+            {
+				if (this.tetris)
+					this.tetris.uiDownStart();
+            }
+			
+            TetrisManager.prototype.uiUpStart = function()
+            {
+				if (this.tetris)
+					this.tetris.uiUpStart();
+            }
+            TetrisManager.prototype.uiLeftEnd = function()
+            {
+				if (this.tetris)
+					this.tetris.uiLeftEnd();
+            }
+            
+            TetrisManager.prototype.uiRightEnd = function()
+            {
+				if (this.tetris)
+					this.tetris.uiRightEnd();
+            }
+            
+            TetrisManager.prototype.uiDownEnd = function()
+            {
+				if (this.tetris)
+					this.tetris.uiDownEnd();
+            }
+			
+            TetrisManager.prototype.uiUpEnd = function()
+            {
+				if (this.tetris)
+					 this.tetris.uiUpEnd();
+            }
+            
+            TetrisManager.prototype.changeClearence = function(c)
+            {
+				if (this.tetris)
+					this.tetris.changeClearence(c);
+            }
+            
+            TetrisManager.prototype.changeRate = function(r)
+            {
+				if (this.tetris)
+                 this.tetris.changeRate(r);
+            }
+			
+			TetrisManager.prototype.changeFastRate = function(r)
+            {
+				if (this.tetris)
+					 this.tetris.changeFastRate(r);
+			}
+			
+			TetrisManager.prototype.changeKeyRepeatRate = function(r)
+            {
+				if (this.tetris)
+					this.tetris.changeKeyRepeatRate(r);
+			}
+			
+			TetrisManager.prototype.changeRotateSpeed = function(r)
+            {
+				if (this.tetris)
+					this.tetris.changeRotateSpeed(r);
+			}
+        </script>
+        <b>Height: </b>
+		<input type="text" value="25" id="height" /> (Number of rows.)<br/>
+        <b>Width: </b>
+		<input type="text" value="8" id="width" /> (Number of columns.)<br/>
+        Clearence: 
+		<input type="text" value="8" id="clearence" onChange="tetrisManager.changeClearence(this.value);"/> (Minimum number of empty rows on top.)<br/>
+        Rate: 
+		<input type="text" value="1000" id="rate" onChange="tetrisManager.changeRate(this.value);"/> (Milliseconds to fall one tile.)<br/>
+        Down Speed: 
+		<input type="text" value="30" id="fastRate" onChange="tetrisManager.changeFastRate(this.value);"/> (If down key is held, command is repeated every X milliseconds)<br/>
+        Rotate Speed: 
+		<input type="text" value="300" id="rotateSpeed" onChange="tetrisManager.changeRotateSpeed(this.value);"/> (If rotate key is held, command is repeated every X milliseconds)<br/>
+        Left/Right Speed: 
+		<input type="text" value="80" id="keyRepeatRate" onChange="tetrisManager.changeKeyRepeatRate(this.value);"/> (If left or right key is held, command is repeated every X milliseconds.)<br/>
+		<font color="#0000ff">Use A, S, D, and W as left, down, right, and up respectively.</font><br/>
+        <input type="button" id="restart" value="Start/Restart" onClick="tetrisManager.restart();" /><br/>
+        <br/>
+		<div id="tetrisContainer"></div>
+		<div id="errorDiv"></div>
+    </body>
+</html>

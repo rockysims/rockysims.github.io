@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en" ng-app="myGoApp">
+<head>
+	<meta charset="utf-8">
+	<title>Go</title>
+	<link rel="stylesheet" href="css/app.css"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<!-- jQuery -->
+	<script src="js/jQuery.js"></script>
+	
+	<!-- Bootstrap -->
+	<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+	<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+	<link href="http://netdna.bootstrapcdn.com/font-awesome/3.1.1/css/font-awesome.css" rel="stylesheet">
+	
+	<!-- AngularJS -->
+	<script src="lib/angular/angular.js"></script>
+	<script src="js/app.js"></script>
+	<script src="js/services.js"></script>
+	<script src="js/controllers.js"></script>
+	<script src="js/filters.js"></script>
+	<script src="js/directives.js"></script>
+</head>
+<body>
+	
+	<script type="text/javascript">
+		function SC(selector) {
+			return angular.element(selector).scope();
+		}
+		
+		var squareSize;
+		var size;
+		$(function() {
+			if (SC('[ng-controller=goGameCtrl]') != undefined) {
+				size = SC('[ng-controller=goGameCtrl]').size;
+				squareSize = SC('[ng-controller=goGameCtrl]').squareSize;
+				
+				drawBoard();
+			}
+		});
+		
+	    function drawBoard() {
+			var canvas = document.getElementById("canvas");
+			if (canvas.getContext) {
+				var ctx = canvas.getContext("2d");
+				
+				var pad = squareSize/2;
+				var left = pad;
+				var right = left + (size-1) * squareSize;
+				var top = pad;
+				var bottom = pad + (size-1) * squareSize;
+				
+				//draw background
+				ctx.beginPath();
+				ctx.fillStyle = "#F2B06D";
+				var tl = {'x': left-pad, 'y': top-pad};
+				var tr = {'x': right+pad, 'y': top-pad};
+				var br = {'x': right+pad, 'y': bottom+pad};
+				var bl = {'x': left-pad, 'y': bottom+pad};
+				ctx.moveTo(tl.x, tl.y);
+				ctx.lineTo(tr.x, tr.y);
+				ctx.lineTo(br.x, br.y);
+				ctx.lineTo(bl.x, bl.y);
+				ctx.lineTo(tl.x, tl.y);
+				ctx.fill();
+				ctx.fillStyle = "#ff0000";
+				ctx.lineWidth = 6;
+				ctx.stroke();
+				ctx.lineWidth = 1;
+				ctx.closePath();
+				
+				//draw lines
+				ctx.beginPath();
+				ctx.fillStyle = "#000000";
+				var x, y
+				for (var i = 0; i < size; i++) {
+					//vertical lines
+					x = left + i*squareSize;
+					ctx.moveTo(x, top);
+					ctx.lineTo(x, bottom);
+					
+					//horizontal lines
+					y = top + i*squareSize;
+					ctx.moveTo(left, y);
+					ctx.lineTo(right, y);
+				}
+				ctx.stroke();
+				ctx.closePath();
+				
+				//draw dots
+				var dots = [];
+				if (size == 9)
+					dots = [[2,2], [2,6], [6,2], [6,6], [4,4]];
+				if (size == 13)
+					dots = [[3,3], [3,9], [9,3], [9,9], [6,6]];
+				ctx.fillStyle = "#000000";
+				var x, y;
+				for (var i = 0; i < dots.length; i++) {
+					x = dots[i][0];
+					y = dots[i][1];
+					ctx.beginPath();
+					ctx.arc(left+x*squareSize,top+y*squareSize,5,0,Math.PI*2,true);
+					ctx.fill();
+					ctx.closePath();
+					
+				}
+			}
+		}
+	</script>
+	
+	<!-- shows considered move when hovered over -->
+	<img id="consideredMoveImg" class="considered stone" src="img/eStone.png" style="display:none;" />
+	<script type="text/javascript">
+		//when the user hovers over a valid move, show semi-transparent stone of their color.
+		//written with jQuery instead of angularJS because less lag
+		$(function() {
+			var board = SC('[ng-controller=goGameCtrl]').board;
+			
+			$(".place").mouseover(function() {
+				var left = $(this).css("left");
+				var top = $(this).css("top");
+				//remove "px" from end of x and y and convert to numbers
+				left = 1*left.substr(0, left.length-2);
+				top = 1*top.substr(0, top.length-2);
+				//align image
+				left += 8;
+				top += 7;
+				
+				var img = $("#consideredMoveImg");
+				img.css("left", left + "px");
+				img.css("top", top + "px");
+				
+				var x = 1*$(this).attr("x");
+				var y = 1*$(this).attr("y");
+				var p = board.getPlaceByXY(x, y);
+				var color = "e";
+				if (board.isValidMove(p) && !board.isInScoringMode())
+					color = board.getTurnColor();
+				img.attr("src", "img/" + color + "Stone.png");
+				
+				img.show();
+			});
+			
+			$(".game").mouseout(function() {
+				var img = $("#consideredMoveImg");
+				img.hide();
+			});
+		});
+	</script>
+	
+	<div class="game" ng-controller="goGameCtrl" ng-mouseout="board.consideredPlace = null;">
+		
+		<!-- board and stones -->
+		<canvas id="canvas" width="{{size*squareSize}}px" height="{{size*squareSize}}px"></canvas>
+		<div class="place" x="{{place.x}}" y="{{place.y}}" style="left:{{place.x*squareSize+20}}px;top:{{place.y*squareSize+20}}px;"
+			ng-repeat="(i, place) in board.places" 
+			ng-click="onClickPlace(place);"
+			ng-mouseover="board.consideredPlace = place;">
+			
+			<!--
+			<img class="considered stone" 
+				src="{{(board.consideredPlace == place && board.isValidMove(place))?'img/'+board.getTurnColor()+'Stone.png':''}}"
+				ng-hide="board.isInScoringMode()" />
+			-->
+			<img class="territory" src="{{getTerritoryImgPath(place)}}" ng-show="board.isInScoringMode()" />
+			<img class="stone dangerLevel{{(board.isInScoringMode())?0:place.group.liberties.length}} {{(place.markedAsDead)?'dead':''}}"
+				ng-src="{{getPlaceImgPath(place)}}" />
+			
+			<div class="liberties liberties{{place.group.liberties.length}} {{place.color}}" ng-hide="place.group.liberties.length == 0">
+				{{place.group.liberties.length}}
+			</div>
+		</div>
+		<br/>
+		<br/>
+		
+		<!-- controls and display -->
+		<div class="well well-sm">
+			<a href="javascript:void();" class="btn btn-inverse" ng-click="pass();">Pass</a>
+			<a href="javascript:void();" class="btn btn-inverse" ng-click="undo();"><i class="icon-white icon-arrow-left"></i> Undo</a>
+			<a href="javascript:void();" class="btn btn-inverse" ng-click="redo();">Redo <i class="icon-white icon-arrow-right"></i></a>
+			<br/>
+			<br/>
+			<span ng-hide="board.isInScoringMode()">
+				<b>{{(board.getTurnColor()=='b')?'Black':'White'}} to play.</b><br/>
+				<span ng-hide="board.turnCount == 0">
+					({{(board.getTurnColor()=='b')?'White':'Black'}} {{(board.playedPlace != null)?"played "+board.playedPlace.x+","+board.playedPlace.y:"passed"}})
+				</span><br/><br/>
+			</span>
+			
+			<span ng-hide="!board.isInScoringMode()">
+				<b>Click groups to toggle marked as dead.</b><br/>
+				<br/>
+			</span>
+			Black captured: {{board.prisoners['w']}}<br/>
+			White captured: {{board.prisoners['b']}}<br/>
+			<br/>
+			<div ng-hide="!board.isInScoringMode()">
+				<u>Score</u>:<br/>
+				<br/>
+				<b>Black</b>:<br/>
+				Territory: {{getScore().b.territory}}<br/>
+				Captured: {{getScore().b.captured}}<br/>
+				Total: {{getScore().b.total}}<br/>
+				<br/>
+				<b>White</b>:<br/>
+				Territory: {{getScore().w.territory}}<br/>
+				Captured: {{getScore().w.captured}}<br/>
+				Total: {{getScore().w.total}}<br/>
+				<br/>
+				<b>Result</b>:<br/>
+				{{(getScore().b.total - getScore().w.total > 0)?"Black":"White"}} wins by {{getScore().result}} points.<br/>
+			</div>
+		</div>
+		<!--
+		<br/><br/><br/><br/><br/>
+		<br/><br/><br/><br/><br/>
+		<div id="debug" style="display:block;">
+			<u>Debug</u><br/>
+			board.state.id: {{game.board.state.id}}<br/>
+			game.board.state.koPlaceCoords: {{game.board.state.koPlaceCoords}}<br/>
+			board.koPlace: {{game.board.koPlace.x + ', ' + game.board.koPlace.y}}<br/>
+			stones: {{debugPlace.group.stones.length}}<br/>
+			groupId: {{debugPlace.group.id}}<br/>
+			x: {{debugPlace.x}}<br/>
+			y: {{debugPlace.y}}<br/>
+		</div>
+		-->
+	</div>
+</body>
+</html>
